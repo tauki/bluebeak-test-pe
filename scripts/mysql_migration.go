@@ -15,17 +15,17 @@ var createTableStatements = []string{
 		points VARCHAR(255) NOT NULL,
 		title TEXT NOT NULL,
 		description TEXT NOT NULL,
-		taster_name VARCHAR(45) NULL,
+		taster_name VARCHAR(255) NULL,
 		taster_twitter_handle VARCHAR(255) NULL,
 		price INT NULL,
 		designation VARCHAR(255) NULL,
 		variety VARCHAR(255) NULL,
-		region_1 VARCHAR(45) NULL,
-		region_2 VARCHAR(45) NULL,
-		province VARCHAR(45) NULL,
+		region_1 VARCHAR(255) NULL,
+		region_2 VARCHAR(255) NULL,
+		province VARCHAR(255) NULL,
 		country VARCHAR(45) NULL,
-		winery VARCHAR(45) NOT NULL
-	)`,
+		winery TEXT NOT NULL
+	)  ENGINE=InnoDB DEFAULT CHARSET=utf8`,
 	`CREATE TABLE IF NOT EXISTS userinfo (
 		id INT UNSIGNED NOT NULL AUTO_INCREMENT,
 		name VARCHAR(255) NULL,
@@ -33,7 +33,7 @@ var createTableStatements = []string{
 		profile_image_url VARCHAR(255) NULL,
 		followers_count INT UNSIGNED NOT NULL,
 		PRIMARY KEY (id)
-	)`,
+	)  ENGINE=InnoDB DEFAULT CHARSET=utf8`,
 }
 
 type MigrationService struct {
@@ -53,6 +53,7 @@ func (ms *MigrationService) InitMigrate(cfg *models.Config) error {
 		msg := fmt.Sprintf("MySQL :: Migration :: Error : %s", err.Error())
 		return errors.New(msg)
 	}
+	defer mysql.Conn.Close()
 
 	// ensure the db is alive
 	err = mysql.Conn.Ping()
