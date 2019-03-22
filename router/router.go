@@ -5,12 +5,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/tauki/bluebeak-test-pe/connection"
 	"github.com/tauki/bluebeak-test-pe/models"
+	"github.com/tauki/bluebeak-test-pe/router/middleware/cors"
 	"net/http"
 )
 
 func InitRouter(cfg *models.Config) (*gin.Engine, error) {
 	router := gin.New()
 
+	router.Use(cors.CORSMiddleware())
 	router.Use(gin.Logger())
 
 	// Setup No Route Message
