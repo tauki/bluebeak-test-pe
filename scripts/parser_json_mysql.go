@@ -52,16 +52,28 @@ func (j *JsonMysqlMigration) Execute() error {
 		return errors.New(msg)
 	}
 
+	//fmt.Println(len(reviews))
+
 	//for _, i := range reviews {
 	//	fmt.Printf("%+v\n", i)
 	//}
 
 	// todo: error handle on partial failure
-	for _, review := range reviews {
-		err := j.dbService.InsertReviews(&review)
-		if err != nil {
-			msg := fmt.Sprintf("Reviews :: insertion :: %s", err.Error())
-			return errors.New(msg)
+
+	// prepare batch
+	batch := make([]models.Reviews,2000)
+
+	for i, review := range reviews {
+		batch = append(batch, review)
+		if len(batch) == 2000 || i == len(reviews)-1 {
+
+			err := j.dbService.InsertReviews(&batch)
+			if err != nil {
+				msg := fmt.Sprintf("Reviews :: insertion :: %s", err.Error())
+				return errors.New(msg)
+			}
+
+			batch = nil
 		}
 	}
 
