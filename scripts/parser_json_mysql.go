@@ -6,18 +6,25 @@ import (
 	"fmt"
 	"github.com/tauki/bluebeak-test-pe/connection"
 	"github.com/tauki/bluebeak-test-pe/models"
+	"github.com/tauki/bluebeak-test-pe/services"
+	"github.com/tauki/bluebeak-test-pe/services/interfaces"
 	"io/ioutil"
 	"os"
 )
 
 type JsonMysqlMigration struct {
-	cfg *models.Config
+	cfg       *models.Config
+	dbService interfaces.DbService
 }
 
-func GetJsonMysqlMigrationService(cfg *models.Config) *JsonMysqlMigration {
+func GetJsonMysqlMigrationService(cfg *models.Config, mysql *connection.MySqlService) *JsonMysqlMigration {
+
+	var dbService *services.DbService
+	dbService = services.GetDbService(cfg, mysql.Conn)
 
 	return &JsonMysqlMigration{
-		cfg: cfg,
+		cfg:       cfg,
+		dbService: dbService,
 	}
 }
 
@@ -49,13 +56,14 @@ func (j *JsonMysqlMigration) Execute() error {
 	//	fmt.Printf("%+v\n", i)
 	//}
 
-	// get MySQL controller
-	db, err := connection.GetMySqlService(j.cfg)
-	if err != nil {
-		msg := fmt.Sprintf("Reviews :: %s", err.Error())
-		return errors.New(msg)
+	// todo: error handle on partial failure
+	for _, review := range reviews {
+		err := j.dbService.InsertReviews(&review)
+		if err != nil {
+			msg := fmt.Sprintf("Reviews :: insertion :: %s", err.Error())
+			return errors.New(msg)
+		}
 	}
-	defer db.Conn.Close()
 
 	return nil
 }
