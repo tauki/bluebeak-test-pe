@@ -7,6 +7,8 @@ import (
 	"github.com/tauki/bluebeak-test-pe/models"
 )
 
+//todo: pool, pipeline
+
 type DbService struct {
 	// until db is decoupled
 	conn *sql.DB
@@ -26,7 +28,7 @@ const insertReviewsStatement = `
     points, title, description, taster_name, taster_twitter_handle, price, designation, variety, region_1, region_2, province, country, winery
   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-func (db *DbService) InsertReviews(reviews *[]models.Reviews) error {
+func (db *DbService) InsertReviews(reviews ...models.Reviews) error {
 	tx, err := db.conn.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("dbService :: tx :: %s", err.Error())
@@ -40,8 +42,7 @@ func (db *DbService) InsertReviews(reviews *[]models.Reviews) error {
 		return errors.New(msg)
 	}
 
-	for _, review := range *reviews {
-
+	for _, review := range reviews {
 		_, err := insertReviews.Exec(
 			review.Points,
 			review.Title,
@@ -58,7 +59,7 @@ func (db *DbService) InsertReviews(reviews *[]models.Reviews) error {
 			review.Winery,
 		)
 		if err != nil {
-			msg := fmt.Sprintf("dbService :: InsertReviewsBatch :: %s", err.Error())
+			msg := fmt.Sprintf("dbService :: InsertReviews :: %s", err.Error())
 			return errors.New(msg)
 		}
 	}
@@ -77,7 +78,7 @@ const insertUserInfoStatement = `
     name, description, profile_image_url, followers_count
   ) VALUES (?, ?, ?, ?)`
 
-func (db *DbService) InsertUserInfo(userInfo *[]models.UserInfo) error {
+func (db *DbService) InsertUserInfo(userInfo ...models.UserInfo) error {
 	//todo
 	return nil
 }

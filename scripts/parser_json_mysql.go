@@ -61,13 +61,13 @@ func (j *JsonMysqlMigration) Execute() error {
 	// todo: error handle on partial failure
 
 	// prepare batch
-	batch := make([]models.Reviews,2000)
+	batch := make([]models.Reviews, 0)
 
 	for i, review := range reviews {
 		batch = append(batch, review)
 		if len(batch) == 2000 || i == len(reviews)-1 {
 
-			err := j.dbService.InsertReviews(&batch)
+			err := j.dbService.InsertReviews(batch...)
 			if err != nil {
 				msg := fmt.Sprintf("Reviews :: insertion :: %s", err.Error())
 				return errors.New(msg)
