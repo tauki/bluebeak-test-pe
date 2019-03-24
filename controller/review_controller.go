@@ -59,6 +59,23 @@ func (r *reviewCtrl) GetReviews(c *gin.Context) {
 	c.JSON(http.StatusFound, reviewRes)
 }
 
+func (r *reviewCtrl) AddReview(c *gin.Context) {
+	var review models.Reviews
+
+	if err := c.ShouldBindJSON(&review); err != nil {
+		r.errorHandler(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := r.dbService.InsertReviews(review)
+	if err != nil {
+		r.errorHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusCreated, review)
+}
+
 func (r *reviewCtrl) errorHandler(router *gin.Context, code int, msg string) {
 	router.JSON(code, &models.Message{
 		Code:    code,

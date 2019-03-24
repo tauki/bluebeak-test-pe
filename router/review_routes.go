@@ -13,6 +13,6 @@ func InitReviewRouter(router *gin.Engine, cfg *models.Config, mysql *sql.DB) {
 
 	review := router.Group("review")
 
-	//review.POST("", reviewCtrl.AddReview)
+	review.POST("", reviewCtrl.AddReview)
 	review.GET("", reviewCtrl.GetReviews)
 }
