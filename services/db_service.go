@@ -80,5 +80,46 @@ const insertUserInfoStatement = `
 
 func (db *DbService) InsertUserInfo(userInfo ...models.UserInfo) error {
 	//todo
+	// twitter get follower count https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=
 	return nil
+}
+
+func (db *DbService) QueryReviews(col string, args ...string) ([]models.Reviews, error) {
+
+	query := fmt.Sprintf("SELECT %s FROM reviews \n", col)
+
+	for _, arg := range args {
+		query += arg + "\n"
+	}
+
+	rows, err := db.conn.Query(query)
+	if err != nil {
+		msg := fmt.Sprintf("dbService :: QueryDb :: %s", err.Error())
+		return nil, errors.New(msg)
+	}
+
+	var reviews []models.Reviews
+	for rows.Next() {
+		var review models.Reviews
+		if err := rows.Scan(
+			&review.Points,
+			&review.Title,
+			&review.Description,
+			&review.TasterName,
+			&review.TasterTwitterHandle,
+			&review.Price,
+			&review.Description,
+			&review.Variety,
+			&review.Region1,
+			&review.Region2,
+			&review.Province,
+			&review.Country,
+			&review.Winery); err != nil {
+			return nil, err
+		}
+
+		reviews = append(reviews, review)
+	}
+
+	return reviews, nil
 }
