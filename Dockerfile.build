@@ -1,0 +1,5 @@
+FROM golang:1.12
+MAINTAINER tauki <ttauki@gmail.com>
+ADD . /go/src/github.com/tauki/bluebeak-test-pe
+WORKDIR /go/src/github.com/tauki/bluebeak-test-pe
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s" -o "main" -a -installsuffix cgo .
