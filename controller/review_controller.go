@@ -12,8 +12,8 @@ import (
 )
 
 type reviewCtrl struct {
-	cfg          *models.Config
-	dbService  interfaces.DbService
+	cfg       *models.Config
+	dbService interfaces.DbService
 }
 
 func GetReviewController(cfg *models.Config, mysql *sql.DB) *reviewCtrl {
@@ -22,7 +22,7 @@ func GetReviewController(cfg *models.Config, mysql *sql.DB) *reviewCtrl {
 	dbService = services.GetDbService(cfg, mysql)
 
 	return &reviewCtrl{
-		cfg: cfg,
+		cfg:       cfg,
 		dbService: dbService,
 	}
 }
@@ -38,25 +38,30 @@ func (r *reviewCtrl) GetReviews(c *gin.Context) {
 	if page == 1 {
 		offset = 0
 	} else {
-		offset = limit*page
+		offset = limit * page
 	}
 
 	query := fmt.Sprintf("LIMIT %d OFFSET %d", limit, offset)
 
 	reviews, err := r.dbService.GetReviews(query)
 	if err != nil || len(reviews) == 0 {
-		c.JSON(http.StatusNotFound, err.Error())
+		r.errorHandler(c, http.StatusNotFound, err.Error())
 		return
 	}
 
 	next := fmt.Sprintf("%s%s?page=%d", c.Request.Host, "/review", page+1)
 
 	reviewRes := models.ReviewRespond{
-		Reviews:reviews,
-		Next: next,
+		Reviews: reviews,
+		Next:    next,
 	}
 
 	c.JSON(http.StatusFound, reviewRes)
 }
 
-
+func (r *reviewCtrl) errorHandler(router *gin.Context, code int, msg string) {
+	router.JSON(code, &models.Message{
+		Code:    code,
+		Message: msg,
+	})
+}
