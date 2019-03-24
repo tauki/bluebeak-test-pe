@@ -7,4 +7,5 @@ type DbService interface {
 	InsertReviews(review ...models.Reviews) error
 	InsertUserInfo(userInfo ...models.UserInfo) error
 	GetReviews(args ...string) ([]models.Reviews, error)
+	QuerySingleCol(col string, table string, args ...string) ([]string, error)
 }

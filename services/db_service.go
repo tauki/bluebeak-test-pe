@@ -123,3 +123,31 @@ func (db *DbService) GetReviews(args ...string) ([]models.Reviews, error) {
 
 	return reviews, nil
 }
+
+func (db *DbService) QuerySingleCol(col string, table string, args ...string) ([]string, error) {
+
+	query := fmt.Sprintf("SELECT %s FROM %s", col, table)
+
+	for _, arg := range args {
+		query += arg + "\n"
+	}
+
+	rows, err := db.conn.Query(query)
+	if err != nil {
+		msg := fmt.Sprintf("dbService :: QuerySingleCol :: %s", err.Error())
+		return nil, errors.New(msg)
+	}
+
+	var data []string
+
+	for rows.Next() {
+		var datum string
+		if err := rows.Scan(&datum); err != nil {
+			return nil, err
+		}
+
+		data = append(data, datum)
+	}
+
+	return data, nil
+}
