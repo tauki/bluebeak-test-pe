@@ -25,10 +25,13 @@ func InitRouter(cfg *models.Config) (*gin.Engine, error) {
 	if err != nil {
 		fmt.Println(fmt.Sprintf("%s \n", err.Error()))
 	}
+
 	err = mySql.Ping()
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Mysql Service is Offline :  %s \n", err.Error()))
 	}
+
+	InitReviewRouter(router, cfg, mySql.Conn)
 
 	return router, nil
 }
