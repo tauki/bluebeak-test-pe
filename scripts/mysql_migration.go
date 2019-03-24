@@ -10,7 +10,7 @@ import (
 
 var createTableStatements = []string{
 	`CREATE DATABASE IF NOT EXISTS blue DEFAULT CHARACTER SET = 'utf8' DEFAULT COLLATE 'utf8_general_ci';`,
-	`USE library;`,
+	`USE blue;`,
 	`CREATE TABLE IF NOT EXISTS reviews (
 		points VARCHAR(255) NOT NULL,
 		title TEXT NOT NULL,
@@ -36,6 +36,13 @@ var createTableStatements = []string{
 	)  ENGINE=InnoDB DEFAULT CHARSET=utf8`,
 }
 
+var dropTableStatements = []string{
+	`DROP TABLE IF EXISTS reviews;`,
+	`DROP TABLE IF EXISTS userinfo;`,
+}
+
+var dropDBStatements = []string{`DROP DATABASE IF EXISTS blue;`}
+
 type MigrationService struct {
 	cfg *models.Config
 }
@@ -47,8 +54,8 @@ func GetMigrationService(cfg *models.Config) *MigrationService {
 }
 
 // InitMigrate checks database health and confirms database and table schemas
-func (ms *MigrationService) InitMigrate(cfg *models.Config) error {
-	mysql, err := connection.GetMySqlService(cfg)
+func (ms *MigrationService) InitMigrate() error {
+	mysql, err := connection.GetMySqlService(ms.cfg)
 	if err != nil {
 		msg := fmt.Sprintf("MySQL :: Migration :: Error : %s", err.Error())
 		return errors.New(msg)
@@ -62,12 +69,44 @@ func (ms *MigrationService) InitMigrate(cfg *models.Config) error {
 		return errors.New(msg)
 	}
 
-	return confirmDatabase(mysql.Conn)
+	err = dropDB(mysql.Conn)
+	if err != nil {
+		msg := fmt.Sprintf("MySQL :: Migration :: Error : %s", err.Error())
+		return errors.New(msg)
+	}
+
+	err = confirmDatabase(mysql.Conn)
+	if err != nil {
+		msg := fmt.Sprintf("MySQL :: Migration :: Error : %s", err.Error())
+		return errors.New(msg)
+	}
+
+	return err
 }
 
 // confirmDatabase creates tables id doesn't exist and if needed the database
 func confirmDatabase(conn *sql.DB) error {
 	for _, stmt := range createTableStatements {
+		_, err := conn.Exec(stmt)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func dropTables(conn *sql.DB) error {
+	for _, stmt := range dropTableStatements {
+		_, err := conn.Exec(stmt)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func dropDB(conn *sql.DB) error {
+	for _, stmt := range dropDBStatements {
 		_, err := conn.Exec(stmt)
 		if err != nil {
 			return err
