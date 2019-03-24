@@ -79,14 +79,14 @@ const insertUserInfoStatement = `
   ) VALUES (?, ?, ?, ?)`
 
 func (db *DbService) InsertUserInfo(userInfo ...models.UserInfo) error {
-	//todo
+	//todo twitter API access is required
 	// twitter get follower count https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=
 	return nil
 }
 
-func (db *DbService) QueryReviews(col string, args ...string) ([]models.Reviews, error) {
+func (db *DbService) GetReviews(args ...string) ([]models.Reviews, error) {
 
-	query := fmt.Sprintf("SELECT %s FROM reviews \n", col)
+	query := fmt.Sprintf("SELECT * FROM reviews \n")
 
 	for _, arg := range args {
 		query += arg + "\n"

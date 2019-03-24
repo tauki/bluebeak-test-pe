@@ -6,5 +6,5 @@ import "github.com/tauki/bluebeak-test-pe/models"
 type DbService interface {
 	InsertReviews(review ...models.Reviews) error
 	InsertUserInfo(userInfo ...models.UserInfo) error
-	QueryReviews(col string, args ...string) ([]models.Reviews, error)
+	GetReviews(args ...string) ([]models.Reviews, error)
 }
