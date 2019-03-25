@@ -5,15 +5,17 @@ import (
 	"github.com/tauki/bluebeak-test-pe/models"
 	"github.com/tauki/bluebeak-test-pe/router"
 	"github.com/urfave/cli"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
 var cfg *models.Config
 
 func init() {
-
+	twiApiKey, twiApiSecret, twiAccessToken, twiAccessTokenSecret := getTwitterKeys()
 	cfg = &models.Config{
 		ServePort: "9010",
 		TLS:       "false",
@@ -29,6 +31,11 @@ func init() {
 		CertPath:       "keys/cert.crt",
 
 		JSONPath: "data/winemag-data-130k-v2-formatted.json",
+
+		TwitterAPIKey:            twiApiKey,
+		TwitterAPISecret:         twiApiSecret,
+		TwitterAccessToken:       twiAccessToken,
+		TwitterAccessTokenSecret: twiAccessTokenSecret,
 	}
 
 }
@@ -79,6 +86,32 @@ func main() {
 func errorMessage(err error, context string) {
 	msg := fmt.Sprintf("ApiGateway :: %s :: %s", context, err.Error())
 	fmt.Println(msg)
+}
+
+// getTwitterKeys require a file named twitter-access in the a package directory
+// inside the named keys inside the root package directory
+// the file should contain, new-line separated and in sequence:
+//		API key
+//		API secret
+//		Access token
+//		Access token secret
+func getTwitterKeys() (string, string, string, string) {
+	f, err := ioutil.ReadFile("keys/twitter-access")
+	if err != nil {
+		errorMessage(err, "getTwitterKeys")
+	}
+
+	creds := strings.Split(string(f), "\n")
+	if len(creds) < 4 {
+		panic("check credentials")
+	}
+
+	fmt.Println(creds)
+	// suffix of the strings may contain an extra \n
+	return strings.TrimSuffix(creds[0], "\n"),
+		strings.TrimSuffix(creds[1], "\n"),
+		strings.TrimSuffix(creds[2], "\n"),
+		strings.TrimSuffix(creds[3], "\n")
 }
 
 // todo: a better error handling for all packages

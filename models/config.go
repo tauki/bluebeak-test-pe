@@ -21,4 +21,10 @@ type Config struct {
 
 	// JSON data
 	JSONPath string
+
+	// Twitter
+	TwitterAPIKey            string
+	TwitterAPISecret         string
+	TwitterAccessToken       string
+	TwitterAccessTokenSecret string
 }
