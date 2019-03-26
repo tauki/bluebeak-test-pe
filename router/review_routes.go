@@ -15,5 +15,7 @@ func InitReviewRouter(router *gin.Engine, cfg *models.Config, mysql *sql.DB) {
 
 	review.POST("", reviewCtrl.AddReview)
 	review.GET("", reviewCtrl.GetReviews)
-	review.GET("unique", reviewCtrl.GetUniqueReviewers)
+	review.GET("list/unique", reviewCtrl.GetUniqueReviewers)
+	review.GET("list/regular", reviewCtrl.GetUsersWith5ReviewsOrMore)
+	review.GET("user/:name", reviewCtrl.GetUserReview)
 }

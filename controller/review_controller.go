@@ -78,6 +78,46 @@ func (r *reviewCtrl) GetUniqueReviewers(c *gin.Context) {
 
 }
 
+func (r *reviewCtrl) GetUserReview(c *gin.Context) {
+
+	query := fmt.Sprintf(`WHERE taster_name = "%s"`, c.Param("name"))
+
+	reviews, err := r.dbService.GetReviews(query)
+	if err != nil {
+		r.errorHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if len(reviews) == 0 {
+		c.JSON(http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
+
+	c.JSON(http.StatusFound, reviews)
+}
+
+func (r *reviewCtrl) GetUsersWith5ReviewsOrMore(c *gin.Context) {
+
+	script, err := scripts.GetMiscService(r.cfg)
+	if err != nil {
+		r.errorHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	reviews, err := script.UsersWith5ReviewsOrMore()
+	if err != nil {
+		r.errorHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if len(reviews) == 0 {
+		c.JSON(http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
+
+	c.JSON(http.StatusFound, reviews)
+}
+
 func (r *reviewCtrl) AddReview(c *gin.Context) {
 
 	var review models.Reviews
