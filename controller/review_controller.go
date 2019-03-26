@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/tauki/bluebeak-test-pe/models"
+	"github.com/tauki/bluebeak-test-pe/scripts"
 	"github.com/tauki/bluebeak-test-pe/services"
 	"github.com/tauki/bluebeak-test-pe/services/interfaces"
 	"net/http"
@@ -53,13 +54,32 @@ func (r *reviewCtrl) GetReviews(c *gin.Context) {
 
 	reviewRes := models.DbResponds{
 		Data: reviews,
-		Next:    next,
+		Next: next,
 	}
 
 	c.JSON(http.StatusFound, reviewRes)
 }
 
+func (r *reviewCtrl) GetUniqueReviewers(c *gin.Context) {
+
+	script, err := scripts.GetMiscService(r.cfg)
+	if err != nil {
+		r.errorHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	reviewers, err := script.UniqueReviewers()
+	if err != nil {
+		r.errorHandler(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusFound, reviewers)
+
+}
+
 func (r *reviewCtrl) AddReview(c *gin.Context) {
+
 	var review models.Reviews
 
 	if err := c.ShouldBindJSON(&review); err != nil {
@@ -76,8 +96,8 @@ func (r *reviewCtrl) AddReview(c *gin.Context) {
 	c.JSON(http.StatusCreated, review)
 }
 
-func (r *reviewCtrl) errorHandler(router *gin.Context, code int, msg string) {
-	router.JSON(code, &models.Message{
+func (r *reviewCtrl) errorHandler(c *gin.Context, code int, msg string) {
+	c.JSON(code, &models.Message{
 		Code:    code,
 		Message: msg,
 	})
