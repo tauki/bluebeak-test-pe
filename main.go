@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/tauki/bluebeak-test-pe/connection"
 	"github.com/tauki/bluebeak-test-pe/models"
 	"github.com/tauki/bluebeak-test-pe/router"
+	"github.com/tauki/bluebeak-test-pe/scripts"
 	"github.com/urfave/cli"
 	"io/ioutil"
 	"net/http"
@@ -45,12 +47,14 @@ func main() {
 	// Get the Current Date During Building
 	currentTime := time.Now().Local()
 
+	// placeholders for flag
+	var script string
+
 	app := cli.NewApp()
 	app.Name = "BlueBeak test PE"
 	app.Version = fmt.Sprintf("%s-alpha", currentTime.Format("06.01.02")) // get server version by date
-
-	//Cli for Server
 	app.Commands = []cli.Command{
+		//Cli for Server
 		{
 			Name:  "run",
 			Usage: "Run the server",
@@ -77,9 +81,112 @@ func main() {
 				}
 			},
 		},
+		// scripts
+		{
+			Name:  "mysql-migrate, msm",
+			Usage: "Migrate mysql, create database or tables if doesn't exist",
+			Action: func(c *cli.Context) {
+				script, err := scripts.GetMigrationService(cfg)
+				if err != nil {
+					errorMessage(err, "msm")
+				}
+
+				err = script.InitMigrate()
+				if err != nil {
+					errorMessage(err, "msm")
+				}
+			},
+		},
+		{
+			Name:  "drop-db, dd",
+			Usage: "Drop database, deletes all the tables and the stored data",
+			Action: func(c *cli.Context) {
+				script, err := scripts.GetMigrationService(cfg)
+				if err != nil {
+					errorMessage(err, "dd")
+				}
+
+				err = script.DropDb()
+				if err != nil {
+					errorMessage(err, "dd")
+				}
+			},
+		},
+		{
+			Name:  "drop-tables, dt",
+			Usage: "Drop tables, deletes all the tables and the stored data",
+			Action: func(c *cli.Context) {
+				script, err := scripts.GetMigrationService(cfg)
+				if err != nil {
+					errorMessage(err, "dd")
+				}
+
+				err = script.DropTables()
+				if err != nil {
+					errorMessage(err, "dd")
+				}
+			},
+		},
+		{
+			Name:  "json-mysql, jm",
+			// todo : use flag for sample data location
+			Usage: "Read the sample data from the configured path and insert them into db",
+			Action: func(c *cli.Context) {
+				script, err := scripts.GetJsonMysqlMigrationService(cfg)
+				if err != nil {
+					errorMessage(err, "jm")
+				}
+
+				err = script.Execute()
+				if err != nil {
+					errorMessage(err, "jm")
+				}
+			},
+		},
+		{
+			Name:  "users-with-5-reviews-or-more, uw5rm",
+			Usage: "Prints out the users in the db with 5 reviews or more",
+			Action: func(c *cli.Context) {
+				script, err := scripts.GetMiscService(cfg)
+				if err != nil {
+					errorMessage(err, "uw5rm")
+				}
+
+				users, err := script.UsersWith5ReviewsOrMore()
+				if err != nil {
+					errorMessage(err, "uw5rm")
+				}
+
+				for _, user := range users {
+					fmt.Println(user)
+				}
+			},
+		},
+		{
+			Name:  "user-unique, uu",
+			Usage: "Prints out the users in the db that are unique",
+			Action: func(c *cli.Context) {
+				script, err := scripts.GetMiscService(cfg)
+				if err != nil {
+					errorMessage(err, "uu")
+				}
+
+				users, err := script.UniqueReviewers()
+				if err != nil {
+					errorMessage(err, "uu")
+				}
+
+				for _, user := range users {
+					fmt.Println(user)
+				}
+			},
+		},
 	}
 
-	app.Run(os.Args)
+	err := app.Run(os.Args)
+	if err != nil {
+		errorMessage(err, "CliRun")
+	}
 
 }
 
