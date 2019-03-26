@@ -36,14 +36,14 @@ func (db *DbService) InsertReviews(reviews ...models.Reviews) error {
 	}
 	defer tx.Rollback()
 
-	insertReviews, err := tx.Prepare(insertReviewsStatement)
+	insert, err := tx.Prepare(insertReviewsStatement)
 	if err != nil {
 		msg := fmt.Sprintf("dbService :: txPrepare :: %s", err.Error())
 		return errors.New(msg)
 	}
 
 	for _, review := range reviews {
-		_, err := insertReviews.Exec(
+		_, err := insert.Exec(
 			review.Points,
 			review.Title,
 			review.Description,
@@ -70,17 +70,6 @@ func (db *DbService) InsertReviews(reviews ...models.Reviews) error {
 		return errors.New(msg)
 	}
 
-	return nil
-}
-
-const insertUserInfoStatement = `
-  INSERT INTO userinfo (
-    name, description, profile_image_url, followers_count
-  ) VALUES (?, ?, ?, ?)`
-
-func (db *DbService) InsertUserInfo(userInfo ...models.UserInfo) error {
-	//todo twitter API access is required
-	// twitter get follower count https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=
 	return nil
 }
 
@@ -124,6 +113,82 @@ func (db *DbService) GetReviews(args ...string) ([]models.Reviews, error) {
 	return reviews, nil
 }
 
+const insertUserInfoStatement = `
+  INSERT INTO userinfo (
+    name, description, profile_image_url, followers_count
+  ) VALUES (?, ?, ?, ?)`
+
+func (db *DbService) InsertUserInfo(userInfos ...models.UserInfo) error {
+	//todo twitter API access is required
+	// twitter get follower count https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=
+
+	tx, err := db.conn.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("dbService :: tx :: %s", err.Error())
+		return errors.New(msg)
+	}
+	defer tx.Rollback()
+
+	insert, err := tx.Prepare(insertUserInfoStatement)
+	if err != nil {
+		msg := fmt.Sprintf("dbService :: txPrepare :: %s", err.Error())
+		return errors.New(msg)
+	}
+
+	for _, userInfo := range userInfos {
+		_, err := insert.Exec(
+			&userInfo.Id,
+			&userInfo.Name,
+			&userInfo.Description,
+			&userInfo.ProfileImageUrl,
+			&userInfo.FollowerCount)
+		if err != nil {
+			msg := fmt.Sprintf("dbService :: InsertUserInfo :: %s", err.Error())
+			return errors.New(msg)
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		msg := fmt.Sprintf("dbService :: txCommit :: %s", err.Error())
+		return errors.New(msg)
+	}
+
+	return nil
+}
+
+func (db *DbService) GetUserInfo(args ...string) ([]models.UserInfo, error) {
+
+	query := fmt.Sprintf("SELECT * FROM userinfo \n")
+
+	for _, arg := range args {
+		query += arg + "\n"
+	}
+
+	rows, err := db.conn.Query(query)
+	if err != nil {
+		msg := fmt.Sprintf("dbService :: GetUserInfo :: %s", err.Error())
+		return nil, errors.New(msg)
+	}
+
+	var userInfos []models.UserInfo
+	for rows.Next() {
+		var userInfo models.UserInfo
+		if err := rows.Scan(
+			&userInfo.Id,
+			&userInfo.Name,
+			&userInfo.Description,
+			&userInfo.ProfileImageUrl,
+			&userInfo.FollowerCount); err != nil {
+			return nil, err
+		}
+
+		userInfos = append(userInfos, userInfo)
+	}
+
+	return userInfos, nil
+}
+
 func (db *DbService) QuerySingleCol(col string, table string, args ...string) ([]string, error) {
 
 	query := fmt.Sprintf("SELECT %s FROM %s", col, table)
@@ -151,3 +216,6 @@ func (db *DbService) QuerySingleCol(col string, table string, args ...string) ([
 
 	return data, nil
 }
+
+// todo : db-query with go type assessment
+// see go reflection laws
