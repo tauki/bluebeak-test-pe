@@ -14,6 +14,8 @@ type Misc struct {
 	dbService interfaces.DbService
 }
 
+// GetMiscServices returns a pointer to the Misc object and error if occurred
+// @param: takes in an object of config model
 func GetMiscService(cfg *models.Config) (*Misc, error) {
 	mysql, err := connection.GetMySqlService(cfg)
 	if err != nil {
@@ -30,6 +32,8 @@ func GetMiscService(cfg *models.Config) (*Misc, error) {
 	}, nil
 }
 
+// UsersWith5ReviewsOrMore returns a list of reviewers who has made
+// 5 or more reviews
 func (m *Misc) UsersWith5ReviewsOrMore() ([]string, error) {
 	r, err := m.dbService.QuerySingleCol(
 		"taster_name",
@@ -47,6 +51,8 @@ func (m *Misc) UsersWith5ReviewsOrMore() ([]string, error) {
 	return r, nil
 }
 
+// UniqueReviewers returns a list of unique reviewers (taster_name col)
+// from the reviews table
 func (m *Misc) UniqueReviewers() ([]string, error) {
 	r, err := m.dbService.QuerySingleCol(
 		"DISTINCT taster_name",

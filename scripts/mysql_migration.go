@@ -69,7 +69,7 @@ func (ms *MigrationService) InitMigrate() error {
 		return errors.New(msg)
 	}
 
-	err = dropDB(mysql.Conn)
+	err = dropDb(mysql.Conn)
 	if err != nil {
 		msg := fmt.Sprintf("MySQL :: Migration :: Error : %s", err.Error())
 		return errors.New(msg)
@@ -95,6 +95,7 @@ func confirmDatabase(conn *sql.DB) error {
 	return nil
 }
 
+// dropTables drops the tables in DB
 func dropTables(conn *sql.DB) error {
 	for _, stmt := range dropTableStatements {
 		_, err := conn.Exec(stmt)
@@ -105,7 +106,9 @@ func dropTables(conn *sql.DB) error {
 	return nil
 }
 
-func dropDB(conn *sql.DB) error {
+// dropDb drops database
+// caution: it removes all the tables and it's contents
+func dropDb(conn *sql.DB) error {
 	for _, stmt := range dropDBStatements {
 		_, err := conn.Exec(stmt)
 		if err != nil {

@@ -17,6 +17,8 @@ type JsonMysqlMigration struct {
 	dbService interfaces.DbService
 }
 
+// GetJsonMysqlMigrationService returns a JsonMysqlMigration object
+// @param: a config model and a mysql connection
 func GetJsonMysqlMigrationService(cfg *models.Config, mysql *connection.MySqlService) *JsonMysqlMigration {
 
 	var dbService *services.DbService
@@ -28,6 +30,8 @@ func GetJsonMysqlMigrationService(cfg *models.Config, mysql *connection.MySqlSer
 	}
 }
 
+// Execute parses the sample json data and
+// inserts them into the respective columns of the table
 func (j *JsonMysqlMigration) Execute() error {
 
 	// open json file
