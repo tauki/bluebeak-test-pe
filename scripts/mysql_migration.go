@@ -45,12 +45,21 @@ var dropDBStatements = []string{`DROP DATABASE IF EXISTS blue;`}
 
 type MigrationService struct {
 	cfg *models.Config
+	db *sql.DB
 }
 
-func GetMigrationService(cfg *models.Config) *MigrationService {
+func GetMigrationService(cfg *models.Config) (*MigrationService, error) {
+
+	mysql, err := connection.GetMySqlService(cfg)
+	if err != nil {
+		msg := fmt.Sprintf("MySQL :: Migration :: Error : %s", err.Error())
+		return nil, errors.New(msg)
+	}
+
 	return &MigrationService{
 		cfg: cfg,
-	}
+		db:mysql.Conn,
+	}, nil
 }
 
 // InitMigrate checks database health and confirms database and table schemas
@@ -69,13 +78,13 @@ func (ms *MigrationService) InitMigrate() error {
 		return errors.New(msg)
 	}
 
-	err = dropDb(mysql.Conn)
+	err = ms.DropDb()
 	if err != nil {
 		msg := fmt.Sprintf("MySQL :: Migration :: Error : %s", err.Error())
 		return errors.New(msg)
 	}
 
-	err = confirmDatabase(mysql.Conn)
+	err = ms.ConfirmDatabase()
 	if err != nil {
 		msg := fmt.Sprintf("MySQL :: Migration :: Error : %s", err.Error())
 		return errors.New(msg)
@@ -85,9 +94,9 @@ func (ms *MigrationService) InitMigrate() error {
 }
 
 // confirmDatabase creates tables id doesn't exist and if needed the database
-func confirmDatabase(conn *sql.DB) error {
+func (ms *MigrationService) ConfirmDatabase() error {
 	for _, stmt := range createTableStatements {
-		_, err := conn.Exec(stmt)
+		_, err := ms.db.Exec(stmt)
 		if err != nil {
 			return err
 		}
@@ -96,9 +105,9 @@ func confirmDatabase(conn *sql.DB) error {
 }
 
 // dropTables drops the tables in DB
-func dropTables(conn *sql.DB) error {
+func (ms *MigrationService) DropTables() error {
 	for _, stmt := range dropTableStatements {
-		_, err := conn.Exec(stmt)
+		_, err := ms.db.Exec(stmt)
 		if err != nil {
 			return err
 		}
@@ -108,9 +117,9 @@ func dropTables(conn *sql.DB) error {
 
 // dropDb drops database
 // caution: it removes all the tables and it's contents
-func dropDb(conn *sql.DB) error {
+func (ms *MigrationService) DropDb() error {
 	for _, stmt := range dropDBStatements {
-		_, err := conn.Exec(stmt)
+		_, err := ms.db.Exec(stmt)
 		if err != nil {
 			return err
 		}

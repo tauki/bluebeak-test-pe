@@ -19,7 +19,12 @@ type JsonMysqlMigration struct {
 
 // GetJsonMysqlMigrationService returns a JsonMysqlMigration object
 // @param: a config model and a mysql connection
-func GetJsonMysqlMigrationService(cfg *models.Config, mysql *connection.MySqlService) *JsonMysqlMigration {
+func GetJsonMysqlMigrationService(cfg *models.Config) (*JsonMysqlMigration, error) {
+	mysql, err := connection.GetMySqlService(cfg)
+	if err != nil {
+		msg := fmt.Sprintf("JSON-Mysql :: Migration :: Error : %s", err.Error())
+		return nil, errors.New(msg)
+	}
 
 	var dbService *services.DbService
 	dbService = services.GetDbService(cfg, mysql.Conn)
@@ -27,7 +32,7 @@ func GetJsonMysqlMigrationService(cfg *models.Config, mysql *connection.MySqlSer
 	return &JsonMysqlMigration{
 		cfg:       cfg,
 		dbService: dbService,
-	}
+	}, nil
 }
 
 // Execute parses the sample json data and
