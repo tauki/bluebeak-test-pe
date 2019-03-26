@@ -16,8 +16,3 @@ type Reviews struct {
 	Country     string `json:"country"`
 	Winery      string `json:"winery"`
 }
-
-type ReviewRespond struct {
-	Reviews []Reviews `json:"reviews"`
-	Next    string    `json:"next"`
-}

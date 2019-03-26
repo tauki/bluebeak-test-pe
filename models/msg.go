@@ -6,3 +6,8 @@ type Message struct {
 	Token   string      `json:"token,omitempty"`
 	Body    interface{} `json:"body,omitempty"`
 }
+
+type DbResponds struct {
+	Data interface{} `json:"data"`
+	Next string      `json:"next"`
+}

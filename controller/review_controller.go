@@ -51,8 +51,8 @@ func (r *reviewCtrl) GetReviews(c *gin.Context) {
 
 	next := fmt.Sprintf("%s%s?page=%d", c.Request.Host, "/review", page+1)
 
-	reviewRes := models.ReviewRespond{
-		Reviews: reviews,
+	reviewRes := models.DbResponds{
+		Data: reviews,
 		Next:    next,
 	}
 
