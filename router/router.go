@@ -32,6 +32,7 @@ func InitRouter(cfg *models.Config) (*gin.Engine, error) {
 	}
 
 	InitReviewRouter(router, cfg, mySql.Conn)
+	InitUserInfoRouter(router, cfg, mySql.Conn)
 
 	return router, nil
 }
