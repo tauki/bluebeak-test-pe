@@ -37,7 +37,6 @@ deploy:
 dep:
 		if [ ! -f Gopkg.toml  ]; then dep init -v; fi;
 		dep ensure -v
-		dep prune -v
 
 
 test:
