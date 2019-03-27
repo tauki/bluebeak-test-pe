@@ -7,9 +7,9 @@ import (
 
 func TestMysqlService(t *testing.T) {
 
-	cfg := Config
+	cfg := *Config
 
-	mysql, err := connection.GetMySqlService(cfg)
+	mysql, err := connection.GetMySqlService(&cfg)
 	if err != nil {
 		t.Error(err)
 	}
@@ -22,35 +22,35 @@ func TestMysqlService(t *testing.T) {
 	}
 
 	cfg.DBUser = "random"
-	mysql, err = connection.GetMySqlService(cfg)
+	mysql, err = connection.GetMySqlService(&cfg)
 	if err == nil {
 		t.Errorf("Expected the function to fail for Username: %s", cfg.DBUser)
 	}
 
-	cfg = Config
+	cfg = *Config
 	cfg.DBName = "random"
-	mysql, err = connection.GetMySqlService(cfg)
+	mysql, err = connection.GetMySqlService(&cfg)
 	if err == nil {
 		t.Errorf("Expected the function to fail for DBName: %s", cfg.DBName)
 	}
 
-	cfg = Config
+	cfg = *Config
 	cfg.DBPort = "random"
-	mysql, err = connection.GetMySqlService(cfg)
+	mysql, err = connection.GetMySqlService(&cfg)
 	if err == nil {
 		t.Errorf("Expected the function to fail for Port: %s", cfg.DBPort)
 	}
 
-	cfg = Config
+	cfg = *Config
 	cfg.DBPass = "random"
-	mysql, err = connection.GetMySqlService(cfg)
+	mysql, err = connection.GetMySqlService(&cfg)
 	if err == nil {
 		t.Errorf("Expected the function to fail for Password: %s", cfg.DBPass)
 	}
 
-	cfg = Config
+	cfg = *Config
 	cfg.DBHost = "random"
-	mysql, err = connection.GetMySqlService(cfg)
+	mysql, err = connection.GetMySqlService(&cfg)
 	if err == nil {
 		t.Errorf("Expected the function to fail for Host: %s, you got the wrong database", cfg.DBHost)
 	}
