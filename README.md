@@ -2,7 +2,24 @@
 
 There are a number of ways to run the program.
 
-To run the program by building from scratch type
+To run the program by building from scratch first you will have to get the pull the vendors
+
+The simplest way to pull the vendors would be just typing 
+```
+make dep
+```
+
+If someone wish to pull the vendors without executing `Makefile`, since the it is required to `dep` the package manager to be already installed. If `dep` is not installed it can be installed from the following link:
+```
+github.com/golang/dep
+```
+After the installation of dep is complete, to pull the vendors type
+```
+dep ensure
+```
+use the flag `-v` to get the verbose logged while it pulls the vendors.
+
+After it is done, to build the program, type:
 ```
 go build -o "main"
 ```
