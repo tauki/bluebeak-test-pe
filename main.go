@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/tauki/bluebeak-test-pe/connection"
 	"github.com/tauki/bluebeak-test-pe/models"
 	"github.com/tauki/bluebeak-test-pe/router"
 	"github.com/tauki/bluebeak-test-pe/scripts"
@@ -34,6 +33,8 @@ func init() {
 
 		JSONPath: "data/winemag-data-130k-v2-formatted.json",
 
+		Twitter:                  "false",
+		TwitterKeyPath:           "keys/twitter-access",
 		TwitterAPIKey:            twiApiKey,
 		TwitterAPISecret:         twiApiSecret,
 		TwitterAccessToken:       twiAccessToken,
@@ -46,9 +47,6 @@ func main() {
 
 	// Get the Current Date During Building
 	currentTime := time.Now().Local()
-
-	// placeholders for flag
-	var script string
 
 	app := cli.NewApp()
 	app.Name = "BlueBeak test PE"
@@ -128,7 +126,7 @@ func main() {
 			},
 		},
 		{
-			Name:  "json-mysql, jm",
+			Name: "json-mysql, jm",
 			// todo : use flag for sample data location
 			Usage: "Read the sample data from the configured path and insert them into db",
 			Action: func(c *cli.Context) {
@@ -202,23 +200,27 @@ func errorMessage(err error, context string) {
 //		API secret
 //		Access token
 //		Access token secret
-func getTwitterKeys() (string, string, string, string) {
-	f, err := ioutil.ReadFile("keys/twitter-access")
-	if err != nil {
-		errorMessage(err, "getTwitterKeys")
+func getTwitterKeys(cfg *models.Config) (string, string, string, string) {
+	if cfg.Twitter == "true" {
+		f, err := ioutil.ReadFile(cfg.TwitterKeyPath)
+		if err != nil {
+			errorMessage(err, "getTwitterKeys")
+		}
+
+		creds := strings.Split(string(f), "\n")
+		if len(creds) < 4 {
+			panic("check credentials")
+		}
+
+		fmt.Println(creds)
+		// suffix of the strings may contain an extra \n
+		return strings.TrimSuffix(creds[0], "\n"),
+			strings.TrimSuffix(creds[1], "\n"),
+			strings.TrimSuffix(creds[2], "\n"),
+			strings.TrimSuffix(creds[3], "\n")
 	}
 
-	creds := strings.Split(string(f), "\n")
-	if len(creds) < 4 {
-		panic("check credentials")
-	}
-
-	fmt.Println(creds)
-	// suffix of the strings may contain an extra \n
-	return strings.TrimSuffix(creds[0], "\n"),
-		strings.TrimSuffix(creds[1], "\n"),
-		strings.TrimSuffix(creds[2], "\n"),
-		strings.TrimSuffix(creds[3], "\n")
+	return "", "", "", ""
 }
 
 // todo: a better error handling for all packages
