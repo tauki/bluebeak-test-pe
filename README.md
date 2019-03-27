@@ -81,3 +81,79 @@ As it is mentioned earlier, the docker container is also run on host mode to bri
 ```
 sudo docker run --network="host" -d --name $(IMAGE_NAME) -p 9010:9010 $(DOCKER_REPO)/$(IMAGE_NAME):$(IMAGE_TAG)
 ```
+
+# APIs
+
+There is not API documentation included in the project. But the following http routes are currently defined
+
+#
+#### Reviews
+
+```
+GET /review
+```
+ This returns a list of reviews from the database as a JSON object.
+ 
+ The structure of the JSON object contains 2 keys, `data` which is an array of review object and the key `next` is the url to fetch the next portion of the reviews. It returns 50 reviews at a time in default.
+    
+```
+POST /review
+```
+Posting to this address allows to add review to the review database.
+
+This expects a JSON object in the request body with the structure matching the structure defined in the `models/review.Reviews` object, the tags as the json key and datatype as the type of the values.
+
+```
+GET /review/list/unique
+```
+This returns an array in a JSON object with the list of unique reviewers from the DB.
+
+```
+GET /review/list/regular
+```
+This returns an array as a JSON object containing the names of the reviewers with 5 or more reviews.
+
+```
+GET review/user/:name
+```
+This returns the reviews made by the an user that's mentioned in the url-param
+
+#
+#### user
+
+```
+GET /user
+```
+This returns a list of users from the `userinfo` table of the database as a JSON object.
+ 
+ The structure of the JSON object contains 2 keys, `data` which is an array of review object and the key `next` is the url to fetch the next portion of the reviews. It returns 50 reviews at a time in default.
+
+ ```
+ POST /user
+ ```
+ Posting to this address allows to add user to the `userinfo` table of the database.
+ 
+ This expects a JSON object in the request body with the structure matching the structure defined in the `models/user.UserInfo` object, the tags as the json key and datatype as the type of the values.
+ 
+ #
+ ### HTTP return codes and error message
+ 
+ Error messages are sent in as a JSON object that has the structure as the structure defined in the `models.msg.Message`, in the JSON the `code` key contains the code of the error and the `Message` object contains details about the error. Only the required data are serialized into the object.
+ 
+```
+400 - Bad request
+Sent when the request sent to the server is to a route fails it's requirements.
+```
+```
+404 - Not Found
+Sent when a searched query resulted in 0 results.
+```
+```
+302 - Found
+Sent when a searched query resulted in 1 or more results.
+```
+```
+500 - Internal server error
+Sent when the server failed to deliver a respond.
+
+```
